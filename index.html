@@ -42,23 +42,6 @@ fieldset{border:0;padding:0;margin:0}.check{display:flex;gap:10px;align-items:ce
 <nav class="nav" aria-label="Main navigation"><button aria-label="Overview" data-page="overview" class="active"><span class="glyph">◈</span><span class="words">Overview</span></button><button aria-label="Televisions" data-page="televisions"><span class="glyph">▣</span><span class="words">Televisions</span></button><button aria-label="DVR and streams" data-page="sources"><span class="glyph">◉</span><span class="words">DVR & Streams</span></button><button aria-label="Control settings" data-page="settings"><span class="glyph">⚙</span><span class="words">Control Settings</span></button></nav><div class="sidefoot"><div class="live"><span class="dot"></span>CONTROL PLANE</div><p class="hint">Saved video playback is independent of this dashboard.</p></div></aside>
 <div class="workspace"><header class="top"><div><span class="eyebrow">HAWK / HOME AREA WATCH KEEPER</span><div style="color:#8ea0b5;font-size:12px;margin-top:3px">Fleet operations · secure remote configuration</div></div><div class="topline"><span class="tag">CLOUD CONNECTED</span><span id="emailTag" class="muted"></span><button id="refresh" class="ghost hidden">Refresh</button><button id="logout" class="ghost hidden">Sign out</button></div></header>
 <main class="content"><section id="login"><div class="card"><div class="eyebrow" style="margin-bottom:12px">RESTRICTED ACCESS</div><h1>Administrator sign in</h1><p class="muted" style="margin:9px 0 23px">HAWK will never charge customers or suspend their TVs automatically. Only approved administrators can issue changes.</p><form id="loginForm"><div class="field"><label for="email">Administrator email</label><input id="email" type="email" autocomplete="username" inputmode="email" required placeholder="you@example.com"></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="1" required placeholder="Enter your password"></div><button class="primary" style="width:100%">Sign in to HAWK Control</button></form><p id="loginStatus" class="hint" role="status" aria-live="polite">No email links or one-time codes required. Only approved administrators have access.</p></div></section>
-<section id="passwordReset" class="hidden" style="max-width:480px;margin:8vh auto">
-  <div class="card">
-    <div class="eyebrow" style="margin-bottom:12px">SECURE ACCOUNT RECOVERY</div>
-    <h1>Set a new password</h1>
-    <p class="muted" style="margin:9px 0 20px">This one-time recovery link is valid for 60 minutes. Your new password stays out of email.</p>
-    <form id="resetForm">
-      <div class="field"><label for="newPassword">New password</label>
-        <input type="password" id="newPassword" required minlength="14" maxlength="128" autocomplete="new-password" placeholder="At least 14 characters">
-      </div>
-      <div class="field"><label for="confirmPassword">Confirm new password</label>
-        <input type="password" id="confirmPassword" required minlength="14" maxlength="128" autocomplete="new-password" placeholder="Repeat your new password">
-      </div>
-      <button class="primary" type="submit" style="width:100%">Save new password</button>
-    </form>
-    <p id="resetStatus" class="hint" role="status" aria-live="polite"></p>
-  </div>
-</section>
 <section id="dashboard" class="hidden">
 <div id="overview" class="page"><div class="heading"><div><div class="eyebrow">OVERVIEW</div><h1>HAWK Control</h1><p class="muted">Approve once. Configure remotely. The televisions keep playing independently.</p></div><button data-goto="televisions" class="primary">Manage televisions →</button></div>
 <div class="stats"><div class="stat"><div class="label">Registered TVs</div><div class="value" id="sAll">—</div><div class="foot">Known installations</div></div><div class="stat"><div class="label">Streaming enabled</div><div class="value" id="sLive">—</div><div class="foot">Authorized and switched on</div></div><div class="stat"><div class="label">Awaiting approval</div><div class="value" id="sPending">—</div><div class="foot">Requires your approval</div></div><div class="stat"><div class="label">Registered streams</div><div class="value" id="sSources">—</div><div class="foot">DVR / camera sources</div></div></div>
@@ -72,33 +55,6 @@ fieldset{border:0;padding:0;margin:0}.check{display:flex;gap:10px;align-items:ce
 import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/+esm";
 const sb=createClient("https://kmflfxwcdmcrrlpifffa.supabase.co","sb_publishable_HnCVCgdRYaCOq_i1qK_JkQ_VyJlwui7",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const el=id=>document.getElementById(id);let session=null,devices=[],sources=[],selected=null,page="overview";
-let resetToken=new URLSearchParams(location.hash.slice(1)).get("reset");
-let resetMode=typeof resetToken==="string"&&/^[A-Za-z0-9_-]{64}$/.test(resetToken);
-if(resetMode){el("passwordReset").classList.remove("hidden");el("login").classList.add("hidden")}
-el("resetForm").onsubmit=async e=>{
- e.preventDefault();
- const a=el("newPassword").value,b=el("confirmPassword").value;
- if(!resetMode||!resetToken){el("resetStatus").textContent="Invalid recovery link.";return}
- if(a!==b){el("resetStatus").textContent="Passwords do not match.";return}
- if(a.length<14||a.length>128){el("resetStatus").textContent="Use 14 to 128 characters.";return}
- const button=e.currentTarget.querySelector("button");
- button.disabled=true;el("resetStatus").textContent="Updating password…";
- try{
-  const resp=await fetch("https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-recovery",{
-   method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:resetToken,password:a})
-  });
-  const data=await resp.json().catch(()=>({error:"Service unavailable"}));
-  if(!resp.ok)throw Error(data.error==="invalid_or_expired_token"?"Recovery link has expired or was already used.":data.error||"Unable to reset password.");
-  el("newPassword").value="";el("confirmPassword").value="";
-  resetToken=null;resetMode=false;
-  history.replaceState(null,"",location.pathname+location.search);
-  el("passwordReset").classList.add("hidden");
-  el("login").classList.remove("hidden");
-  el("loginStatus").textContent="Password updated. Sign in with your new password.";
- }catch(err){el("resetStatus").textContent=err.message}
- finally{button.disabled=false}
-};
-
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notify(s,bad=false){el("toast").textContent=s;el("toast").className=bad?"bad":"";clearTimeout(window.hawkToast);window.hawkToast=setTimeout(()=>el("toast").className="hidden",4100)}
 const api="https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-admin";
@@ -126,7 +82,7 @@ el("suspend").onclick=async()=>{if(!selected||!confirm("Suspend playback for thi
 el("loginForm").onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector("button");b.disabled=true;el("loginStatus").textContent="Signing in securely…";try{const {data,error}=await sb.auth.signInWithPassword({email:el("email").value.trim(),password:el("password").value});el("password").value="";if(error)throw error;if(!data.session)throw Error("No session returned");await start(data.session)}catch(e){el("password").value="";el("loginStatus").textContent=/invalid login credentials/i.test(e.message)?"Incorrect email or password. Use the password for your existing HAWK administrator account.":"Sign-in unavailable: "+e.message}finally{b.disabled=false}};
 el("logout").onclick=async()=>{await sb.auth.signOut();session=null;el("dashboard").classList.add("hidden");el("login").classList.remove("hidden");el("logout").classList.add("hidden");el("refresh").classList.add("hidden");el("emailTag").textContent=""};
 async function start(s){session=s;el("dashboard").classList.remove("hidden");el("login").classList.add("hidden");el("logout").classList.remove("hidden");el("refresh").classList.remove("hidden");el("emailTag").textContent=s.user?.email||"";await refresh();}
-const {data:{session:existing}}=await sb.auth.getSession();if(existing&&!resetMode)await start(existing);
-sb.auth.onAuthStateChange((event,s)=>{if(!resetMode&&event==="SIGNED_IN"&&s&&!session)setTimeout(()=>{if(!session)start(s)},0)});
+const {data:{session:existing}}=await sb.auth.getSession();if(existing)await start(existing);
+sb.auth.onAuthStateChange((event,s)=>{if(event==="SIGNED_IN"&&s&&!session)setTimeout(()=>{if(!session)start(s)},0)});
 setInterval(()=>{if(session&&document.visibilityState==="visible")refresh()},60000);
 </script></body></html>

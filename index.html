@@ -55,6 +55,19 @@ fieldset{border:0;padding:0;margin:0}.check{display:flex;gap:10px;align-items:ce
     <p id="recoveryStatus" class="hint" role="status" aria-live="polite"></p>
   </div>
 </section>
+<section id="firstTimePassword" class="hidden" style="max-width:470px;margin:8vh auto">
+ <div class="card">
+  <div class="eyebrow" style="margin-bottom:12px">FIRST-TIME LOGIN</div>
+  <h1>Create your private password</h1>
+  <p class="muted" style="margin:9px 0 22px">The temporary password worked. Before you can manage any TVs, replace it with a new password that only you know. This step cannot be skipped.</p>
+  <form id="firstTimeForm">
+    <div class="field"><label for="firstPassword">New password</label><input id="firstPassword" type="password" autocomplete="new-password" minlength="14" maxlength="128" required placeholder="14–128 characters"></div>
+    <div class="field"><label for="firstConfirm">Confirm new password</label><input id="firstConfirm" type="password" autocomplete="new-password" minlength="14" maxlength="128" required placeholder="Repeat your new password"></div>
+    <button type="submit" class="primary" style="width:100%">Set new password</button>
+  </form>
+  <p id="firstTimeStatus" class="hint" role="status" aria-live="polite"></p>
+ </div>
+</section>
 <section id="dashboard" class="hidden">
 <div id="overview" class="page"><div class="heading"><div><div class="eyebrow">OVERVIEW</div><h1>HAWK Control</h1><p class="muted">Approve once. Configure remotely. The televisions keep playing independently.</p></div><button data-goto="televisions" class="primary">Manage televisions →</button></div>
 <div class="stats"><div class="stat"><div class="label">Registered TVs</div><div class="value" id="sAll">—</div><div class="foot">Known installations</div></div><div class="stat"><div class="label">Streaming enabled</div><div class="value" id="sLive">—</div><div class="foot">Authorized and switched on</div></div><div class="stat"><div class="label">Awaiting approval</div><div class="value" id="sPending">—</div><div class="foot">Requires your approval</div></div><div class="stat"><div class="label">Registered streams</div><div class="value" id="sSources">—</div><div class="foot">DVR / camera sources</div></div></div>
@@ -89,13 +102,41 @@ function populate(d){el("tvEmpty").classList.add("hidden");el("tvForm").classLis
 el("streamChecks").innerHTML=sources.length?sources.map(s=>'<label class="check"><input type="checkbox" data-source-id="'+esc(s.id)+'" '+(d.source_ids.includes(s.id)?'checked':'')+'>'+esc(s.label)+'</label>').join(""):'<p class="hint">Add a DVR source first.</p>';
 el("tvRevision").textContent="Configuration revision "+d.revision;}
 function selectDevice(id){selected=id;render()}
-async function refresh(){if(!session)return;try{const [ds,ss]=await Promise.all([request("/devices"),request("/sources")]);devices=ds.devices||[];sources=ss.sources||[];render()}catch(e){if(e.message==="administrator_required"){session=null;el("dashboard").classList.add("hidden");el("login").classList.remove("hidden");el("loginStatus").textContent="This account is not an approved HAWK administrator.";await sb.auth.signOut();return;}notify("Unable to load HAWK devices: "+e.message,true)}}
+async function refresh(){if(!session)return;try{const [ds,ss]=await Promise.all([request("/devices"),request("/sources")]);devices=ds.devices||[];sources=ss.sources||[];render()}catch(e){if(e.message==="password_change_required"){await start(session);return}if(e.message==="administrator_required"){session=null;el("dashboard").classList.add("hidden");el("login").classList.remove("hidden");el("loginStatus").textContent="This account is not an approved HAWK administrator.";await sb.auth.signOut();return;}notify("Unable to load HAWK devices: "+e.message,true)}}
 el("tvSearch").addEventListener("input",render);el("reloadTV").onclick=refresh;el("refresh").onclick=refresh;
 el("sourceForm").onsubmit=async e=>{e.preventDefault();const f=e.currentTarget;const b=f.querySelector("button");b.disabled=true;try{await request("/sources",{method:"POST",body:JSON.stringify({label:el("srcLabel").value,host:el("srcHost").value,port:Number(el("srcPort").value),username:el("srcUser").value,password:el("srcPass").value,path:el("srcPath").value})});f.reset();el("srcPort").value="554";el("srcPath").value="/Streaming/channels/";notify("Video source added");await refresh()}catch(e){notify(e.message,true)}finally{b.disabled=false}};
 el("tvForm").onsubmit=async e=>{e.preventDefault();if(!selected)return;const ids=[...el("streamChecks").querySelectorAll("input:checked")].map(n=>n.dataset.sourceId);try{await request("/devices/"+selected,{method:"PATCH",body:JSON.stringify({name:el("tvName").value,approved:el("tvApproved").checked,enabled:el("tvEnabled").checked,audioAllowed:el("tvAudio").checked,navigationAllowed:el("tvNavigation").checked,displayMode:el("tvMode").value,sourceIds:ids})});notify("Configuration saved. TV applies it at next check-in.");await refresh()}catch(e){notify(e.message,true)}};
 el("suspend").onclick=async()=>{if(!selected||!confirm("Suspend playback for this TV? Existing offline playback may continue until the TV next checks in."))return;try{await request("/devices/"+selected,{method:"PATCH",body:JSON.stringify({enabled:false})});notify("Suspension sent. TV receives it when online.");await refresh()}catch(e){notify(e.message,true)}};
 el("loginForm").onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector("button");b.disabled=true;el("loginStatus").textContent="Signing in securely…";try{const {data,error}=await sb.auth.signInWithPassword({email:el("email").value.trim(),password:el("password").value});el("password").value="";if(error)throw error;if(!data.session)throw Error("No session returned");await start(data.session)}catch(e){el("password").value="";el("loginStatus").textContent=/invalid login credentials/i.test(e.message)?"Incorrect email or password. Use the password for your existing HAWK administrator account.":"Sign-in unavailable: "+e.message}finally{b.disabled=false}};
 
+el("firstTimeForm").onsubmit=async e=>{
+ e.preventDefault();
+ const pw=el("firstPassword").value;
+ const confirmation=el("firstConfirm").value;
+ const status=el("firstTimeStatus");
+ if(pw!==confirmation){status.textContent="Passwords do not match.";return}
+ if(pw.length<14||pw.length>128){status.textContent="Choose a password of 14–128 characters.";return}
+ const b=e.currentTarget.querySelector("button");
+ b.disabled=true;status.textContent="Saving your new password securely…";
+ try{
+  if(!session?.access_token)throw Error("Please sign in again with the temporary password.");
+  const resp=await fetch(api+"/change-password",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
+    body:JSON.stringify({newPassword:pw})
+  });
+  const data=await resp.json().catch(()=>({}));
+  if(!resp.ok)throw Error(data.error||"Password change failed.");
+  el("firstPassword").value="";el("firstConfirm").value="";
+  await sb.auth.signOut();
+  session=null;
+  el("firstTimePassword").classList.add("hidden");
+  el("login").classList.remove("hidden");
+  el("loginStatus").textContent="Password changed. Sign in with your new password.";
+  el("password").value="";
+ }catch(err){status.textContent=err.message}
+ finally{b.disabled=false}
+};
 el("forgotPassword").onclick=async()=>{
  const email=el("email").value.trim();
  if(!email||!el("email").checkValidity()){el("loginStatus").textContent="Enter your administrator email first.";el("email").focus();return}
@@ -131,7 +172,27 @@ el("recoveryForm").onsubmit=async e=>{
  finally{btn.disabled=false}
 };
 el("logout").onclick=async()=>{await sb.auth.signOut();session=null;el("dashboard").classList.add("hidden");el("login").classList.remove("hidden");el("logout").classList.add("hidden");el("refresh").classList.add("hidden");el("emailTag").textContent=""};
-async function start(s){session=s;el("dashboard").classList.remove("hidden");el("login").classList.add("hidden");el("logout").classList.remove("hidden");el("refresh").classList.remove("hidden");el("emailTag").textContent=s.user?.email||"";await refresh();}
+async function start(s){
+ session=s;
+ const {data,error}=await sb.auth.getUser();
+ if(error||!data?.user)throw Error("Could not verify the administrator account.");
+ if(data.user.app_metadata?.hawk_password_reset_required){
+  el("dashboard").classList.add("hidden");
+  el("login").classList.add("hidden");
+  el("resetPassword").classList.add("hidden");
+  el("firstTimePassword").classList.remove("hidden");
+  el("logout").classList.add("hidden");
+  el("refresh").classList.add("hidden");
+  return;
+ }
+ el("firstTimePassword").classList.add("hidden");
+ el("dashboard").classList.remove("hidden");
+ el("login").classList.add("hidden");
+ el("logout").classList.remove("hidden");
+ el("refresh").classList.remove("hidden");
+ el("emailTag").textContent=data.user.email||"";
+ await refresh();
+}
 sb.auth.onAuthStateChange((event,s)=>{
  if(event==="PASSWORD_RECOVERY"){setTimeout(showRecovery,0);return}
  if(event==="SIGNED_IN"&&s&&!session&&!recoveryMode)setTimeout(()=>{if(!session&&!recoveryMode)start(s)},0);

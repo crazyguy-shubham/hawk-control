@@ -10,7 +10,7 @@ Secure, mobile-first management dashboard for HAWK (Home Area Watch Keeper). Thi
 
 ## Features
 
-- Email-link administrator sign-in (Supabase Auth)
+- Administrator email + password sign-in (Supabase Auth, no email-link rate limits)
 - TV registration, approval and manual suspension
 - Per-TV display mode and camera source assignment
 - Device last-check-in indicator and configuration revision
@@ -20,7 +20,7 @@ Secure, mobile-first management dashboard for HAWK (Home Area Watch Keeper). Thi
 
 ## Security
 
-The frontend only contains a **public Supabase publishable key**. Never put a service-role/secret key in the browser or repository. The backend checks Supabase's authenticated user against `public.hawk_administrators` before returning or changing device data; API data is not directly exposed by anonymous database access. Database tables have RLS enabled. Administrators must sign in using an approved account. Configure Supabase Auth URL allow-list for the final dashboard address before using magic links.
+The frontend only contains a **public Supabase publishable key**. Never put a service-role/secret key in the browser or repository. The backend checks Supabase's authenticated user against `public.hawk_administrators` before returning or changing device data; API data is not directly exposed by anonymous database access. Database tables have RLS enabled. Administrators must sign in using an approved account. The admin account must already have a password credential. Do not add a signup form or hardcode credentials in this public repository. Configure Supabase Auth URL allow-list for the final dashboard address before using magic links.
 
 ## Deployment
 

@@ -39,7 +39,7 @@ fieldset{border:0;padding:0;margin:0}.check{display:flex;gap:10px;align-items:ce
 }
 </style></head><body>
 <div class="shell"><aside class="sidebar"><div class="brand"><img class="logo" id="logo" alt="HAWK" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23101822'/%3E%3Cpath d='M9 37L44 11l-9 24 21-7-18 25z' fill='%23fff'/%3E%3Ccircle cx='36' cy='28' r='7' fill='%23ed4c55'/%3E%3Ccircle cx='36' cy='28' r='3' fill='%2338d6d3'/%3E%3C/svg%3E"><div class="words"><div class="name">HAWK</div><div class="caption">CONTROL</div></div></div>
-<nav class="nav" aria-label="Main navigation"><button aria-label="Overview" data-page="overview" class="active"><span class="glyph">◈</span><span class="words">Overview</span></button><button aria-label="Televisions" data-page="televisions"><span class="glyph">▣</span><span class="words">Televisions</span></button><button aria-label="DVR and streams" data-page="sources"><span class="glyph">◉</span><span class="words">DVR & Streams</span></button><button aria-label="Control settings" data-page="settings"><span class="glyph">⚙</span><span class="words">Control Settings</span></button></nav><div class="sidefoot"><div class="live"><span class="dot"></span>CONTROL PLANE</div><p class="hint">Saved video playback is independent of this dashboard.</p></div></aside>
+<nav class="nav" aria-label="Main navigation"><button aria-label="Overview" data-page="overview" class="active"><span class="glyph">◈</span><span class="words">Overview</span></button><button aria-label="Televisions" data-page="televisions"><span class="glyph">▣</span><span class="words">Televisions</span></button><button aria-label="DVR and streams" data-page="sources"><span class="glyph">◉</span><span class="words">DVR & Streams</span></button><button aria-label="App updates" data-page="updates"><span class="glyph">⇧</span><span class="words">Updates</span></button><button aria-label="Control settings" data-page="settings"><span class="glyph">⚙</span><span class="words">Control Settings</span></button></nav><div class="sidefoot"><div class="live"><span class="dot"></span>CONTROL PLANE</div><p class="hint">Saved video playback is independent of this dashboard.</p></div></aside>
 <div class="workspace"><header class="top"><div><span class="eyebrow">HAWK / HOME AREA WATCH KEEPER</span><div style="color:#8ea0b5;font-size:12px;margin-top:3px">Fleet operations · secure remote configuration</div></div><div class="topline"><span class="tag">CLOUD CONNECTED</span><span id="emailTag" class="muted"></span><button id="refresh" class="ghost hidden">Refresh</button><button id="logout" class="ghost hidden">Sign out</button></div></header>
 <main class="content"><section id="login"><div class="card"><div class="eyebrow" style="margin-bottom:12px">RESTRICTED ACCESS</div><h1>Administrator sign in</h1><p class="muted" style="margin:9px 0 23px">HAWK will never charge customers or suspend their TVs automatically. Only approved administrators can issue changes.</p><form id="loginForm"><div class="field"><label for="email">Administrator email</label><input id="email" type="email" autocomplete="username" inputmode="email" required placeholder="you@example.com"></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="1" required placeholder="Enter your password"></div><button class="primary" style="width:100%">Sign in to HAWK Control</button></form><button id="forgotPassword" type="button" class="ghost" style="margin-top:12px;width:100%">Forgot password?</button><p id="loginStatus" class="hint" role="status" aria-live="polite">Only approved administrators have access.</p></div></section>
 <section id="resetPassword" class="hidden" style="max-width:450px;margin:8vh auto">
@@ -75,6 +75,34 @@ fieldset{border:0;padding:0;margin:0}.check{display:flex;gap:10px;align-items:ce
 <div id="televisions" class="page hidden"><div class="heading"><div><div class="eyebrow">FLEET / DEVICES</div><h1>Televisions</h1><p class="muted">Each install has its own cryptographic identity. Only approved TVs receive DVR details.</p></div><button id="reloadTV" class="ghost">↻ Refresh</button></div><div class="grid"><div class="card"><div class="cardhead"><h2>Registered devices</h2><span id="tvCounter" class="tag"></span></div><input class="search" id="tvSearch" placeholder="Search TV, room, device ID" aria-label="Filter devices"><div id="devicesList" class="stack" style="margin-top:14px"></div></div>
 <div class="card"><div class="cardhead"><h2>TV configuration</h2></div><p id="tvEmpty" class="muted">Select a television to view and change its settings.</p><form id="tvForm" class="hidden"><label>Installation identity</label><p id="tvId" class="mono" style="margin-bottom:16px"></p><div class="field"><label for="tvName">TV name / room</label><input id="tvName" maxlength="120" required></div><div class="formgrid"><label class="check"><input id="tvApproved" type="checkbox">Approved</label><label class="check"><input id="tvEnabled" type="checkbox">Playback enabled</label><label class="check"><input id="tvAudio" type="checkbox">Allow audio</label><label class="check"><input id="tvNavigation" type="checkbox">Allow left / right switching</label></div><div class="field"><label for="tvMode">Display mode</label><select id="tvMode"><option value="CHANNEL_ZERO">Channel Zero combined view</option><option value="SINGLE">Single camera</option><option value="SCENE_LIST">Multiple selectable streams</option></select></div><div class="field"><label>Authorized camera streams</label><div id="streamChecks" class="stack"></div><p class="hint">One authorized stream: left/right does nothing.</p></div><div class="buttons"><button type="submit" class="primary">Save remote configuration</button><button id="suspend" type="button" class="negative">Suspend TV</button></div><p id="tvRevision" class="hint"></p></form></div></div></div>
 <div id="sources" class="page hidden"><div class="heading"><div><div class="eyebrow">SOURCE LIBRARY</div><h1>DVR & camera streams</h1><p class="muted">Register video sources here. Changes reach TVs without reinstalling the APK.</p></div></div><div class="grid"><div class="card"><div class="cardhead"><h2>Saved video sources</h2></div><div id="sourcesList" class="stack"></div></div><div class="card"><h2 style="margin-bottom:19px">Register a stream</h2><form id="sourceForm"><div class="field"><label for="srcLabel">Display label</label><input id="srcLabel" required maxlength="120" placeholder="Building A — Channel Zero"></div><div class="formgrid"><div class="field"><label for="srcHost">DVR hostname / local IP</label><input id="srcHost" required placeholder="192.168.1.150"></div><div class="field"><label for="srcPort">RTSP port</label><input id="srcPort" type="number" min="1" max="65535" value="554" required></div><div class="field"><label for="srcUser">Streaming username</label><input id="srcUser" autocomplete="off"></div><div class="field"><label for="srcPass">Streaming password</label><input id="srcPass" autocomplete="new-password" type="password"></div></div><div class="field"><label for="srcPath">Verified RTSP path</label><input id="srcPath" required placeholder="/Streaming/channels/..." value="/Streaming/channels/"></div><button type="submit" class="primary">Add video source</button><p class="hint">Channel Zero's RTSP path must be verified on the actual DVR. Do not assume Camera 101 is Channel Zero.</p></form></div></div></div>
+
+<div id="updates" class="page hidden">
+ <div class="heading"><div><div class="eyebrow">FLEET / SOFTWARE DELIVERY</div><h1>App updates</h1><p class="muted">Release library for HAWK TV and TV Bridge. Push per TV; customer approves on Android.</p></div><button class="ghost" id="otaRefresh">Refresh</button></div>
+ <div class="card"><div class="cardhead"><h2>Publish an APK release</h2></div>
+ <p class="hint">Signed APKs only. Use the same signing certificate and a higher version code as the installed app. HAWK and TV Bridge need their OTA-capable builds before remote installation works.</p>
+ <form id="otaUploadForm"><div class="form-grid">
+ <div><label for="otaApp">Application</label><select id="otaApp" required><option value="hawk_tv">HAWK TV</option><option value="tv_bridge">TV Bridge</option></select></div>
+ <div><label for="otaVersionCode">Android version code</label><input id="otaVersionCode" type="number" required min="1" step="1" placeholder="2"></div>
+ <div><label for="otaVersionName">Version</label><input id="otaVersionName" required maxlength="40" placeholder="0.5.0"></div>
+ <div><label for="otaFile">APK file (max 75 MiB)</label><input id="otaFile" type="file" accept=".apk,application/vnd.android.package-archive" required></div>
+ <div style="grid-column:1/-1"><label for="otaSigner">Signing certificate SHA-256 fingerprint (from apksigner, 64 hex characters)</label><input id="otaSigner" minlength="64" maxlength="95" placeholder="Paste the certificate SHA-256 digest" required></div>
+ <div style="grid-column:1/-1"><label for="otaNotes">Release notes</label><input id="otaNotes" maxlength="2000" placeholder="Bug fixes and improvements"></div>
+ </div><button class="primary" type="submit" id="otaPublish">Upload and publish verified APK</button></form>
+ </div>
+ <div class="grid">
+  <div class="card"><div class="cardhead"><h2>Deploy update to one TV</h2></div>
+   <label for="otaDevice">Destination television</label><select id="otaDevice"></select>
+   <label for="otaRelease" style="margin-top:13px">Published HAWK TV version</label><select id="otaRelease"></select>
+   <button type="button" id="otaDeploy" class="primary" style="margin-top:16px">Push to selected TV</button>
+   <p class="hint">Only approved, enabled TVs with the OTA receiver can retrieve a pushed update. The user may need to accept an Android installation prompt.</p>
+  </div>
+  <div class="card"><div class="cardhead"><h2>TV Bridge approvals</h2></div><div id="otaBridges" class="stack"><p class="muted">Checking connected phones…</p></div></div>
+ </div>
+ <div class="grid">
+  <div class="card"><div class="cardhead"><h2>Published and draft releases</h2></div><div id="otaReleases" class="stack"></div></div>
+  <div class="card"><div class="cardhead"><h2>Per-TV update history</h2></div><div id="otaJobs" class="stack"></div></div>
+ </div>
+</div>
 <div id="settings" class="page hidden"><div class="heading"><div><div class="eyebrow">PLATFORM / POLICY</div><h1>Control settings</h1><p class="muted">HAWK behaves like a remote control, never a media server.</p></div></div><div class="card"><h2>Independent playback</h2><p class="muted" style="margin-top:9px">Once approved, each TV securely saves its configuration and streams directly from its DVR. Cloud or laptop outages do not revoke existing playback. Only an explicit administrator command can suspend an approved installation when it next checks in.</p><div class="hr"></div><h2>No payment automation</h2><p class="muted" style="margin-top:8px">No subscriptions, expiry timers, payment records, automated suspension or billing.</p><div class="hr"></div><h2>TV error handling</h2><p class="muted" style="margin-top:8px">Users receive simple, specific guidance for interrupted streams or network failures. DVR credentials and technical diagnostics stay hidden.</p></div></div>
 </section><div id="toast" class="hidden" role="status" aria-live="polite"></div></main></div></div>
 <script type="module">
@@ -86,8 +114,18 @@ const el=id=>document.getElementById(id);let session=null,devices=[],sources=[],
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notify(s,bad=false){el("toast").textContent=s;el("toast").className=bad?"bad":"";clearTimeout(window.hawkToast);window.hawkToast=setTimeout(()=>el("toast").className="hidden",4100)}
 const api="https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-admin";
+
+const otaApi="https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-updates";
+async function otaRequest(path,opts={}){
+ if(!session?.access_token)throw Error("Sign in required");
+ const r=await fetch(otaApi+path,{...opts,headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json",...(opts.headers||{})}});
+ const d=await r.json().catch(()=>({error:"invalid_response"}));
+ if(!r.ok)throw Error(d.error||"Update service error");
+ return d;
+}
+
 async function request(path,opts={}){const r=await fetch(api+path,{...opts,headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"}});const d=await r.json().catch(()=>({error:"invalid_response"}));if(!r.ok)throw Error(d.error||"Request failed");return d}
-function go(p){page=p;document.querySelectorAll(".page").forEach(n=>n.classList.toggle("hidden",n.id!==p));document.querySelectorAll("[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===p))}
+function go(p){page=p;document.querySelectorAll(".page").forEach(n=>n.classList.toggle("hidden",n.id!==p));document.querySelectorAll("[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===p));if(p==="updates"&&session)void refreshOta()}
 document.querySelectorAll("[data-page],[data-goto]").forEach(n=>n.addEventListener("click",()=>go(n.dataset.page||n.dataset.goto)));
 function badge(d){return !d.approved?'<span class="badge pending">Pending</span>':!d.enabled?'<span class="badge suspended">Suspended</span>':'<span class="badge">Enabled</span>'}
 function row(d,clickable=false){return '<div class="item '+(clickable?'selectable ':'')+(selected===d.id?'picked':'')+'" '+(clickable?'data-id="'+esc(d.id)+'"':'')+'><div><strong>'+esc(d.name)+'</strong><div class="sub">'+esc(d.id.slice(0,12))+' · '+esc(d.last_seen_at?new Date(d.last_seen_at).toLocaleString():"Never checked in")+'</div></div>'+badge(d)+'</div>'}
@@ -197,6 +235,71 @@ sb.auth.onAuthStateChange((event,s)=>{
  if(event==="PASSWORD_RECOVERY"){setTimeout(showRecovery,0);return}
  if(event==="SIGNED_IN"&&s&&!session&&!recoveryMode)setTimeout(()=>{if(!session&&!recoveryMode)start(s)},0);
 });
+
+let otaReleases=[],otaJobs=[],otaBridges=[];
+function otaOptions(){
+ const tvs=devices.filter(d=>d.approved&&d.enabled);
+ el("otaDevice").innerHTML=tvs.length?tvs.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+' ('+esc(d.id.slice(0,8))+')</option>').join(""):'<option value="">No approved TVs</option>';
+ const rels=otaReleases.filter(r=>r.app==="hawk_tv"&&r.status==="published").sort((a,b)=>b.version_code-a.version_code);
+ el("otaRelease").innerHTML=rels.length?rels.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.version_name)+' (code '+r.version_code+')</option>').join(""):'<option value="">No published HAWK releases</option>';
+ el("otaDeploy").disabled=!tvs.length||!rels.length;
+}
+async function refreshOta(){
+ if(!session)return;
+ try{
+  const [r,j,b]=await Promise.all([otaRequest("/admin/releases"),otaRequest("/admin/jobs"),otaRequest("/admin/bridges")]);
+  otaReleases=r.releases||[];otaJobs=j.jobs||[];otaBridges=b.bridges||[];
+  el("otaReleases").innerHTML=otaReleases.length?otaReleases.map(x=>'<div class="item"><div><strong>'+esc(x.app==="hawk_tv"?"HAWK TV":"TV Bridge")+' v'+esc(x.version_name)+'</strong><div class="sub">Code '+x.version_code+' · '+esc(x.status)+' · '+esc((x.sha256||"").slice(0,12))+'…</div></div>'+(x.status==="published"?'<button class="ghost" data-retire="'+esc(x.id)+'">Retire</button>':'')+'</div>').join(""):'<p class="muted">No releases uploaded yet.</p>';
+  el("otaJobs").innerHTML=otaJobs.length?otaJobs.map(j=>'<div class="item"><div><strong>'+esc(j.hawk_devices?.name||j.device_id?.slice(0,12)||"TV")+'</strong><div class="sub">'+esc(j.hawk_releases?.version_name||"Unknown version")+' · '+esc(j.status)+' · '+esc(j.error_code||"")+'</div></div>'+(["queued","downloading","awaiting_approval"].includes(j.status)?'<button class="ghost" data-cancel="'+esc(j.id)+'">Cancel</button>':'')+'</div>').join(""):'<p class="muted">No remote update jobs yet.</p>';
+  el("otaBridges").innerHTML=otaBridges.length?otaBridges.map(b=>'<div class="item"><div><strong>'+esc(b.name)+'</strong><div class="sub">'+esc(b.approved?"Approved":"Approval pending")+' · '+esc(b.last_seen_at?new Date(b.last_seen_at).toLocaleString():"Never checked in")+'</div></div>'+(b.approved?'':'<button class="primary" data-approve="'+esc(b.id)+'">Approve</button>')+'</div>').join(""):'<p class="muted">No OTA-enabled TV Bridge devices enrolled yet.</p>';
+  otaOptions();
+ }catch(e){notify("Update service: "+e.message,true)}
+}
+el("otaRefresh").onclick=refreshOta;
+el("otaUploadForm").onsubmit=async e=>{
+ e.preventDefault();
+ const button=el("otaPublish"),file=el("otaFile").files?.[0];
+ if(!file||file.size<1024||file.size>78643200||!file.name.toLowerCase().endsWith(".apk")){notify("Select a valid APK no larger than 75 MiB",true);return}
+ const signingCertSha256=el("otaSigner").value.replace(/:/g,"").replace(/\s/g,"").toLowerCase();
+ if(!/^[0-9a-f]{64}$/.test(signingCertSha256)){notify("APK signing certificate SHA-256 must be 64 hexadecimal characters",true);return}
+ button.disabled=true;button.textContent="Verifying and uploading...";
+ try{
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  if(bytes[0]!==0x50||bytes[1]!==0x4b||bytes[2]!==0x03||bytes[3]!==0x04)throw Error("Not a valid APK ZIP header");
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  const sha256=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,"0")).join("");
+  const payload={app:el("otaApp").value,versionCode:Number(el("otaVersionCode").value),versionName:el("otaVersionName").value.trim(),signingCertSha256,sha256,byteSize:file.size,notes:el("otaNotes").value};
+  const draft=await otaRequest("/admin/releases/prepare",{method:"POST",body:JSON.stringify(payload)});
+  const uploaded=await sb.storage.from(draft.upload.bucket).uploadToSignedUrl(draft.upload.path,draft.upload.token,file,{contentType:"application/vnd.android.package-archive"});
+  if(uploaded.error)throw Error("APK upload failed: "+uploaded.error.message);
+  await otaRequest("/admin/releases/"+draft.id+"/publish",{method:"POST"});
+  notify("APK published successfully. Deploy it from this page.");
+  el("otaUploadForm").reset();
+  await refreshOta();
+ }catch(err){notify("Publishing failed: "+err.message,true)}
+ finally{button.disabled=false;button.textContent="Upload and publish verified APK"}
+};
+el("otaDeploy").onclick=async()=>{
+ const deviceId=el("otaDevice").value,releaseId=el("otaRelease").value;
+ if(!deviceId||!releaseId)return;
+ const tv=devices.find(x=>x.id===deviceId);
+ const rel=otaReleases.find(x=>x.id===releaseId);
+ if(!confirm("Send HAWK "+(rel?.version_name||"update")+" to "+(tv?.name||"TV")+"? This requires the OTA-enabled TV app and may ask the customer to approve installation."))return;
+ try{await otaRequest("/admin/jobs",{method:"POST",body:JSON.stringify({deviceId,releaseId})});notify("Update queued for selected TV");await refreshOta()}catch(e){notify(e.message,true)}
+};
+el("otaReleases").onclick=async e=>{
+ const b=e.target.closest("[data-retire]");if(!b||!confirm("Retire this release and cancel outstanding update jobs?"))return;
+ try{await otaRequest("/admin/releases/"+b.dataset.retire+"/retire",{method:"POST"});notify("Release retired");await refreshOta()}catch(err){notify(err.message,true)}
+};
+el("otaJobs").onclick=async e=>{
+ const b=e.target.closest("[data-cancel]");if(!b)return;
+ try{await otaRequest("/admin/jobs/"+b.dataset.cancel+"/cancel",{method:"POST"});notify("Update cancelled");await refreshOta()}catch(err){notify(err.message,true)}
+};
+el("otaBridges").onclick=async e=>{
+ const b=e.target.closest("[data-approve]");if(!b||!confirm("Approve this TV Bridge phone to receive private APK updates?"))return;
+ try{await otaRequest("/admin/bridges/"+b.dataset.approve+"/approve",{method:"POST"});notify("TV Bridge approved");await refreshOta()}catch(err){notify(err.message,true)}
+};
+
 const {data:{session:existing}}=await sb.auth.getSession();
 if(recoveryMode){showRecovery();if(!existing)el("recoveryStatus").textContent="Verifying reset link…"}
 else if(existing)await start(existing);

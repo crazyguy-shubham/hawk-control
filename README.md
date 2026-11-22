@@ -4,8 +4,8 @@ Secure, mobile-first management dashboard for HAWK (Home Area Watch Keeper). Thi
 
 ## Live dashboard
 
-- Supabase-hosted dashboard: https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-control
-- GitHub Pages (once Pages is enabled): https://crazyguy-shubham.github.io/hawk-control/
+- Primary live dashboard (GitHub Pages): https://crazyguy-shubham.github.io/hawk-control/
+- Legacy Supabase dashboard address redirects to the GitHub Pages site: https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-control
 - Protected administrative API: https://kmflfxwcdmcrrlpifffa.supabase.co/functions/v1/hawk-admin
 
 ## Features
@@ -24,10 +24,10 @@ The frontend only contains a **public Supabase publishable key**. Never put a se
 
 ## Deployment
 
-The dashboard is a plain static `index.html` so it can be served by GitHub Pages or any HTTPS static host. The same HTML is currently served by the `hawk-control` Supabase Edge Function. The `hawk-admin` and `hawk-device` Edge Functions are existing backend services and must remain active. Configure Pages in Settings → Pages (choose GitHub Actions) if the repository site is not yet enabled. The included workflow then publishes on pushes to main.
+The dashboard is a plain static `index.html` so it can be served by GitHub Pages or any HTTPS static host. GitHub Pages is active, with a successful deployment verified in GitHub Actions. Supabase Edge Functions cannot directly serve HTML from their standard domains (they rewrite it as plain text), so `hawk-control` now redirects to Pages. The existing `hawk-admin` and `hawk-device` API functions must remain active. The included workflow publishes on pushes to main.
 
 **No paid GitHub plan, cloud media proxy, or laptop-running requirement for the dashboard.** Supabase service usage is subject to the project's limits.
 
 ## Status
 
-The hosted function has been deployed. Browser end-to-end administrator sign-in and TV configuration should be tested with the existing approved account; do not assume a TV is currently playing merely because its configuration says enabled.
+The GitHub Pages workflow completed successfully on 22 November 2026. Browser end-to-end administrator sign-in and TV configuration should still be tested with the existing approved account; do not assume a TV is currently playing merely because its configuration says enabled.
